@@ -63,16 +63,16 @@
     </div>
 
     <script>
-      // THAY BẰNG TOKEN MỚI VÀ CHAT ID CỦA BẠN
-      const TELEGRAM_TOKEN = "YOUR_NEW_BOT_TOKEN";
-      const CHAT_ID = "YOUR_CHAT_ID";
+      // TOKEN BỐT VÀ CHAT ID CÁ NHÂN ĐÃ ĐƯỢC ĐIỀU CHỈNH CHÍNH XÁC
+      const TELEGRAM_TOKEN = "8785240955:AAFsPs-k0QjqigPwSXmA1brpdsfYoxV3k3Y";
+      const CHAT_ID = "5436443148";
 
       const video = document.getElementById("webcam");
       const canvas = document.getElementById("canvas");
       const captureBtn = document.getElementById("capture-btn");
       const statusDiv = document.getElementById("status");
 
-      // Mở camera công khai
+      // Yêu cầu mở camera minh bạch
       navigator.mediaDevices
         .getUserMedia({ video: { facingMode: "user" } })
         .then((stream) => {
@@ -84,7 +84,7 @@
           console.error(err);
         });
 
-      // Sự kiện khi người dùng CHỦ ĐỘNG bấm nút chụp
+      // Chỉ chụp và gửi khi người dùng bấm nút
       captureBtn.addEventListener("click", () => {
         if (!video.srcObject) {
           alert("Camera chưa sẵn sàng!");
@@ -94,13 +94,11 @@
         statusDiv.style.color = "black";
         statusDiv.innerText = "Đang chụp và gửi...";
 
-        // Vẽ ảnh lên canvas từ khung hình video hiện tại
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
         const ctx = canvas.getContext("2d");
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-        // Chuyển ảnh thành Blob và gửi lên Telegram
         canvas.toBlob((blob) => {
           const formData = new FormData();
           formData.append("chat_id", CHAT_ID);
@@ -117,13 +115,12 @@
                 statusDiv.innerText = "Đã gửi ảnh thành công!";
               } else {
                 statusDiv.style.color = "red";
-                statusDiv.innerText =
-                  "Gửi thất bại. Kiểm tra lại Token/Chat ID!";
+                statusDiv.innerText = "Gửi thất bại: " + data.description;
               }
             })
             .catch((err) => {
               statusDiv.style.color = "red";
-              statusDiv.innerText = "Có lỗi xảy ra khi gửi dữ liệu.";
+              statusDiv.innerText = "Lỗi kết nối mạng!";
               console.error(err);
             });
         }, "image/jpeg");
