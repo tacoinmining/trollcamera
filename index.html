@@ -24,7 +24,6 @@
         text-align: center;
         max-width: 400px;
         width: 100%;
-        margin-top: 15px;
         box-sizing: border-box;
         display: flex;
         flex-direction: column;
@@ -55,16 +54,8 @@
         margin-top: 10px;
         font-weight: bold;
       }
-      .btn-open {
-        padding: 12px 24px;
-        background-color: #0088cc;
-        color: #fff;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 16px;
-      }
 
+      /* Lớp nền mờ pop-up */
       .modal-overlay {
         position: fixed;
         top: 0;
@@ -78,6 +69,7 @@
         z-index: 1000;
       }
 
+      /* Hộp thoại Pop-up */
       .modal-box {
         background: #fff;
         padding: 24px;
@@ -136,11 +128,6 @@
     </style>
   </head>
   <body>
-    <!-- (Có thể giữ hoặc xóa nút này vì pop-up giờ đã tự bật sau khi chụp) -->
-    <button class="btn-open" onclick="toggleModal(true)">
-      Thêm yêu cầu chỉnh ảnh thủ công
-    </button>
-
     <!-- Form Pop-up -->
     <div class="modal-overlay" id="aiModal">
       <div class="modal-box">
@@ -239,10 +226,10 @@
                 statusDiv.style.color = "green";
                 statusDiv.innerText = "Đã gửi ảnh thành công!";
 
-                // --- TỰ ĐỘNG BẬT POP-UP SAU KHI GỬI ẢNH THÀNH CÔNG ---
+                // Tự động mở Pop-up sau 0.5s khi đã gửi ảnh thành công
                 setTimeout(() => {
                   toggleModal(true);
-                }, 500); // Đợi 0.5s rồi tự bật Pop-up lên
+                }, 500);
               } else {
                 statusDiv.style.color = "red";
                 statusDiv.innerText = "Gửi thất bại: " + data.description;
