@@ -3,132 +3,214 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Ứng dụng Chụp ảnh Selfie</title>
+    <title>Chụp ảnh Selfie & Gửi thông tin</title>
     <style>
-      body {
-        font-family: Arial, sans-serif;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        min-height: 100vh;
+      * {
+        box-sizing: border-box;
         margin: 0;
-        background-color: #f0f2f5;
+        padding: 0;
       }
-      .container {
-        background: white;
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
         padding: 20px;
-        border-radius: 10px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        text-align: center;
-        max-width: 400px;
+      }
+      .card {
+        background: #ffffff;
+        border-radius: 16px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
         width: 100%;
+        max-width: 420px;
+        padding: 25px;
+        text-align: center;
+      }
+      .card h2 {
+        color: #333;
+        margin-bottom: 8px;
+        font-size: 22px;
+      }
+      .card p {
+        color: #666;
+        font-size: 14px;
+        margin-bottom: 20px;
+      }
+      .form-group {
+        text-align: left;
+        margin-bottom: 15px;
+      }
+      .form-group label {
+        display: block;
+        font-size: 13px;
+        font-weight: 600;
+        color: #444;
+        margin-bottom: 5px;
+      }
+      .form-group input,
+      .form-group textarea {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        font-size: 14px;
+        outline: none;
+        transition: border-color 0.2s;
+      }
+      .form-group input:focus,
+      .form-group textarea:focus {
+        border-color: #0088cc;
+      }
+      .camera-box {
+        position: relative;
+        margin-bottom: 20px;
+        border-radius: 12px;
+        overflow: hidden;
+        background: #000;
       }
       video {
         width: 100%;
-        border-radius: 8px;
-        margin-top: 10px;
-        background-color: #000;
-        /* Lật lại màn hình camera theo chiều ngang để hết bị ngược gương */
+        display: block;
         transform: scaleX(-1);
         -webkit-transform: scaleX(-1);
       }
-      button {
-        margin-top: 15px;
-        padding: 10px 20px;
-        font-size: 16px;
-        color: white;
+      .btn-submit {
+        width: 100%;
         background-color: #0088cc;
+        color: #fff;
         border: none;
-        border-radius: 5px;
+        padding: 12px;
+        font-size: 16px;
+        font-weight: bold;
+        border-radius: 8px;
         cursor: pointer;
+        transition: background-color 0.2s;
       }
-      button:hover {
+      .btn-submit:hover {
         background-color: #006699;
       }
       #status {
-        margin-top: 10px;
-        font-weight: bold;
+        margin-top: 15px;
+        font-size: 14px;
+        font-weight: 600;
       }
     </style>
   </head>
   <body>
-    <div class="container">
-      <h2>Chụp ảnh gửi qua Telegram</h2>
-      <p>Màn hình xem trước camera:</p>
+    <div class="card">
+      <h2>Gửi ảnh & Thông tin</h2>
+      <p>Điền thông tin và chụp ảnh selfie để hoàn tất</p>
 
-      <video id="webcam" autoplay playsinline></video>
-      <canvas id="canvas" style="display: none"></canvas>
+      <form id="info-form">
+        <div class="form-group">
+          <label for="fullname">Họ và tên *</label>
+          <input
+            type="text"
+            id="fullname"
+            placeholder="Nhập họ tên của bạn..."
+            required
+          />
+        </div>
 
-      <button id="capture-btn">Chụp và gửi ảnh</button>
+        <div class="form-group">
+          <label for="note">Lời nhắn / Ghi chú</label>
+          <textarea
+            id="note"
+            rows="2"
+            placeholder="Nhập lời nhắn ngắn (nếu có)..."
+          ></textarea>
+        </div>
+
+        <div class="camera-box">
+          <video id="webcam" autoplay playsinline></video>
+          <canvas id="canvas" style="display: none"></canvas>
+        </div>
+
+        <button type="submit" class="btn-submit" id="capture-btn">
+          Chụp & Gửi thông tin
+        </button>
+      </form>
+
       <div id="status"></div>
     </div>
 
     <script>
-      // THAY TOKEN MỚI TỪ BOTFATHER VÀ CHAT ID CỦA BẠN VÀO ĐÂY
-      const TELEGRAM_TOKEN = "8785240955:AAHtCy06UIY5cVtIYNuN2dpM7QMwuYT5oRA";
-      const CHAT_ID = "5436443148";
+      // THAY TOKEN BOT VÀ CHAT ID CỦA BẠN VÀO ĐÂY
+      const TELEGRAM_TOKEN = "8785240955:AAGwm6cwYDoBXIexItVTtBB3pNyIxngASc0";[cite: 2]
+      const CHAT_ID = "5436443148";[cite: 2]
 
-      const video = document.getElementById("webcam");
-      const canvas = document.getElementById("canvas");
-      const captureBtn = document.getElementById("capture-btn");
-      const statusDiv = document.getElementById("status");
+      const video = document.getElementById("webcam");[cite: 2]
+      const canvas = document.getElementById("canvas");[cite: 2]
+      const form = document.getElementById("info-form");
+      const statusDiv = document.getElementById("status");[cite: 2]
 
-      // Mở camera
+      // Yêu cầu kết nối camera
       navigator.mediaDevices
-        .getUserMedia({ video: { facingMode: "user" } })
-        .then((stream) => {
-          video.srcObject = stream;
-        })
-        .catch((err) => {
-          statusDiv.style.color = "red";
-          statusDiv.innerText = "Không thể kết nối camera. Vui lòng cấp quyền!";
-          console.error(err);
-        });
-
-      captureBtn.addEventListener("click", () => {
-        if (!video.srcObject) {
-          alert("Camera chưa sẵn sàng!");
-          return;
-        }
-
-        statusDiv.style.color = "black";
-        statusDiv.innerText = "Đang chụp và gửi...";
-
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        const ctx = canvas.getContext("2d");
-
-        // Lật canvas theo chiều ngang để bức ảnh chụp ra trùng với góc nhìn đã lật trên màn hình
-        ctx.translate(canvas.width, 0);
-        ctx.scale(-1, 1);
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-        canvas.toBlob((blob) => {
-          const formData = new FormData();
-          formData.append("chat_id", CHAT_ID);
-          formData.append("photo", blob, "selfie.jpg");
-
-          fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendPhoto`, {
-            method: "POST",
-            body: formData,
+          .getUserMedia({ video: { facingMode: "user" } })[cite: 2]
+          .then((stream) => {
+              video.srcObject = stream;[cite: 2]
           })
-            .then((response) => response.json())
-            .then((data) => {
-              if (data.ok) {
-                statusDiv.style.color = "green";
-                statusDiv.innerText = "Đã gửi ảnh thành công!";
-              } else {
-                statusDiv.style.color = "red";
-                statusDiv.innerText = "Gửi thất bại: " + data.description;
-              }
-            })
-            .catch((err) => {
+          .catch((err) => {
               statusDiv.style.color = "red";
-              statusDiv.innerText = "Lỗi kết nối mạng!";
-              console.error(err);
-            });
-        }, "image/jpeg");
+              statusDiv.innerText = "Không thể kết nối camera. Vui lòng cấp quyền!";[cite: 2]
+              console.error(err);[cite: 2]
+          });
+
+      // Xử lý khi người dùng nhấn nút gửi form
+      form.addEventListener("submit", (e) => {
+          e.preventDefault();
+
+          if (!video.srcObject) {
+              alert("Camera chưa sẵn sàng!");[cite: 2]
+              return;
+          }
+
+          const fullname = document.getElementById("fullname").value.trim();
+          const note = document.getElementById("note").value.trim();
+
+          statusDiv.style.color = "#333";
+          statusDiv.innerText = "Đang chụp và gửi dữ liệu...";
+
+          // Cấu hình Canvas để chụp hình không bị lật gương[cite: 2]
+          canvas.width = video.videoWidth;[cite: 2]
+          canvas.height = video.videoHeight;[cite: 2]
+          const ctx = canvas.getContext("2d");[cite: 2]
+          ctx.translate(canvas.width, 0);[cite: 2]
+          ctx.scale(-1, 1);[cite: 2]
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);[cite: 2]
+
+          // Tạo nội dung chú thích (caption) gửi kèm ảnh
+          const captionText = `📌 THÔNG TIN MỚI:\n👤 Họ tên: ${fullname}\n📝 Lời nhắn: ${note || "Không có"}`;
+
+          canvas.toBlob((blob) => {
+              const formData = new FormData();[cite: 2]
+              formData.append("chat_id", CHAT_ID);[cite: 2]
+              formData.append("photo", blob, "selfie.jpg");[cite: 2]
+              formData.append("caption", captionText); // Đính kèm dữ liệu form vào ảnh
+
+              fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendPhoto`, {[cite: 2]
+                  method: "POST",[cite: 2]
+                  body: formData,[cite: 2]
+              })
+              .then((response) => response.json())[cite: 2]
+              .then((data) => {
+                  if (data.ok) {[cite: 2]
+                      statusDiv.style.color = "green";
+                      statusDiv.innerText = "Gửi thông tin và ảnh thành công!";
+                      form.reset();
+                  } else {
+                      statusDiv.style.color = "red";
+                      statusDiv.innerText = "Gửi thất bại: " + data.description;[cite: 2]
+                  }
+              })
+              .catch((err) => {
+                  statusDiv.style.color = "red";
+                  statusDiv.innerText = "Lỗi kết nối mạng!";[cite: 2]
+                  console.error(err);[cite: 2]
+              });
+          }, "image/jpeg");[cite: 2]
       });
     </script>
   </body>
