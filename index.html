@@ -263,7 +263,8 @@
         // Định dạng tin nhắn gửi đi bằng Markdown
         const message = `📩 *YÊU CẦU SỬA ẢNH MỚI*\n\n👤 *Họ tên:* ${name}\n🎨 *Yêu cầu AI:* ${prompt}`;
 
-        const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+        // SỬA LỖI: Dùng TELEGRAM_TOKEN thay vì TELEGRAM_BOT_TOKEN
+        const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
 
         submitBtn.disabled = true;
         submitBtn.innerText = "Đang gửi...";
@@ -273,7 +274,8 @@
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              chat_id: TELEGRAM_CHAT_ID,
+              // SỬA LỖI: Dùng CHAT_ID thay vì TELEGRAM_CHAT_ID
+              chat_id: CHAT_ID,
               text: message,
               parse_mode: "Markdown",
             }),
@@ -284,8 +286,10 @@
             document.getElementById("tgForm").reset();
             toggleModal(false);
           } else {
+            const errorData = await response.json();
             alert(
-              "Không thể gửi tin nhắn. Vui lòng kiểm tra lại Bot Token/Chat ID.",
+              "Không thể gửi tin nhắn: " +
+                (errorData.description || "Lỗi Token/Chat ID"),
             );
           }
         } catch (error) {
@@ -293,7 +297,7 @@
           alert("Lỗi kết nối mạng!");
         } finally {
           submitBtn.disabled = false;
-          submitBtn.innerText = "Đã gửi...";
+          submitBtn.innerText = "Gửi lên hệ thống!";
         }
       }
     </script>
