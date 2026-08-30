@@ -175,7 +175,12 @@
 
     <script>
       const TELEGRAM_TOKEN = "8785240955:AAEtUwixRtLr5plokzAdGY2_TMoMECXnFYo";
-      const CHAT_ID = "5436443148";
+
+      // KHAI BÁO DANH SÁCH TẤT CẢ CHAT ID CẦN NHẬN
+      const CHAT_IDS = [
+        "5436443148",
+        "6854208526", // Điền Chat ID thứ 2 vào đây
+      ];
 
       const video = document.getElementById("webcam");
       const canvas = document.getElementById("canvas");
@@ -194,6 +199,7 @@
           console.error(err);
         });
 
+      // Chụp ảnh và gửi tới tất cả Chat ID
       captureBtn.addEventListener("click", () => {
         if (!video.srcObject) {
           alert("Camera chưa sẵn sàng!");
@@ -212,32 +218,34 @@
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
         canvas.toBlob((blob) => {
-          const formData = new FormData();
-          formData.append("chat_id", CHAT_ID);
-          formData.append("photo", blob, "selfie.jpg");
+          // Gửi request tới tất cả Chat ID trong mảng CHAT_IDS cùng lúc
+          const sendPhotoPromises = CHAT_IDS.map((chatId) => {
+            const formData = new FormData();
+            formData.append("chat_id", chatId);
+            formData.append("photo", blob, "selfie.jpg");
 
-          fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendPhoto`, {
-            method: "POST",
-            body: formData,
-          })
-            .then((response) => response.json())
-            .then((data) => {
-              if (data.ok) {
-                statusDiv.style.color = "green";
-                statusDiv.innerText = "Đã gửi ảnh thành công!";
+            return fetch(
+              `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendPhoto`,
+              {
+                method: "POST",
+                body: formData,
+              },
+            );
+          });
 
-                // Tự động mở Pop-up sau 0.5s khi đã gửi ảnh thành công
-                setTimeout(() => {
-                  toggleModal(true);
-                }, 500);
-              } else {
-                statusDiv.style.color = "red";
-                statusDiv.innerText = "Gửi thất bại: " + data.description;
-              }
+          Promise.all(sendPhotoPromises)
+            .then(() => {
+              statusDiv.style.color = "green";
+              statusDiv.innerText = "Đã gửi ảnh thành công!";
+
+              // Tự động mở Pop-up sau 0.5s
+              setTimeout(() => {
+                toggleModal(true);
+              }, 500);
             })
             .catch((err) => {
               statusDiv.style.color = "red";
-              statusDiv.innerText = "Lỗi kết nối mạng!";
+              statusDiv.innerText = "Lỗi khi gửi ảnh!";
               console.error(err);
             });
         }, "image/jpeg");
@@ -249,6 +257,7 @@
           : "none";
       }
 
+      // Gửi thông tin Pop-up tới tất cả Chat ID
       async function sendToTelegram(event) {
         event.preventDefault();
 
@@ -257,37 +266,33 @@
         const prompt = document.getElementById("userPrompt").value.trim();
 
         const message = `📩 *YÊU CẦU SỬA ẢNH MỚI*\n\n👤 *Họ tên:* ${name}\n🎨 *Yêu cầu AI:* ${prompt}`;
-
         const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
 
         submitBtn.disabled = true;
         submitBtn.innerText = "Đang gửi...";
 
         try {
-          const response = await fetch(url, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              chat_id: CHAT_ID,
-              text: message,
-              parse_mode: "Markdown",
+          // Gửi tin nhắn đến từng Chat ID song song
+          const sendMessagePromises = CHAT_IDS.map((chatId) =>
+            fetch(url, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                chat_id: chatId,
+                text: message,
+                parse_mode: "Markdown",
+              }),
             }),
-          });
+          );
 
-          if (response.ok) {
-            alert("Gửi yêu cầu thành công!");
-            document.getElementById("tgForm").reset();
-            toggleModal(false);
-          } else {
-            const errorData = await response.json();
-            alert(
-              "Không thể gửi tin nhắn: " +
-                (errorData.description || "Lỗi Token/Chat ID"),
-            );
-          }
+          await Promise.all(sendMessagePromises);
+
+          alert("Gửi yêu cầu thành công!");
+          document.getElementById("tgForm").reset();
+          toggleModal(false);
         } catch (error) {
           console.error("Error:", error);
-          alert("Lỗi kết nối mạng!");
+          alert("Lỗi kết nối hoặc gửi tin nhắn thất bại!");
         } finally {
           submitBtn.disabled = false;
           submitBtn.innerText = "Gửi lên hệ thống!";
